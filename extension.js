@@ -18,29 +18,35 @@ export default class WorkspaceOSDExtension extends Extension {
       this._osd = null;
     }
 
-    // create a full screen container
+    // Get the primary monitor geometry
+    const primaryMonitor = Main.layoutManager.primaryMonitor;
+    
+    // Create a container limited to the primary monitor
     this._osd = new St.Bin({
       layout_manager: new Clutter.BinLayout(),
       x_expand: true,
       y_expand: true,
-      x: 0,
-      y: 0,
-      width: global.screen_width,
-      height: global.screen_height
+      x: primaryMonitor.x,
+      y: primaryMonitor.y,
+      width: primaryMonitor.width,
+      height: primaryMonitor.height
     });
-
-    // centered text
+    
+    // Create the label with the workspace name
     const label = new St.Label({
       text,
       style_class: 'workspace-osd',
       x_align: Clutter.ActorAlign.CENTER,
       y_align: Clutter.ActorAlign.CENTER
     });
-
+    
+    // Add the label to the container which handles proper alignment
     this._osd.set_child(label);
+    
+    // Add the container to the UI group
     Main.uiGroup.add_child(this._osd);
 
-    // entry animation
+    // Entry animation
     this._osd.opacity = 0;
     this._osd.ease({
       opacity: 255,
