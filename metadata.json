@@ -1,0 +1,7 @@
+{
+  "name": "Workspace OSD",
+  "description": "Show the current workspace name when changing workspace",
+  "uuid": "workspace-osd@crteknologies.fr",
+  "shell-version": ["48"],
+  "version": 1
+}
