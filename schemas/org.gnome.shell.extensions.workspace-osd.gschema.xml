@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.workspace-osd" path="/org/gnome/shell/extensions/workspace-osd/">
+    <key name="display-duration" type="i">
+      <default>1000</default>
+      <summary>Display Duration</summary>
+      <description>Duration in milliseconds to show the OSD</description>
+    </key>
+    <key name="animation-duration" type="i">
+      <default>200</default>
+      <summary>Animation Duration</summary>
+      <description>Duration in milliseconds for fade in/out animations</description>
+    </key>
+    <key name="position-x" type="d">
+      <default>0.5</default>
+      <summary>Horizontal Position</summary>
+      <description>Horizontal position as percentage (0.0-1.0) of screen width</description>
+    </key>
+    <key name="position-y" type="d">
+      <default>0.5</default>
+      <summary>Vertical Position</summary>
+      <description>Vertical position as percentage (0.0-1.0) of screen height</description>
+    </key>
+    <key name="custom-css" type="s">
+      <default>""</default>
+      <summary>Custom CSS</summary>
+      <description>Custom CSS styling for the OSD</description>
+    </key>
+    <key name="show-preview" type="b">
+      <default>false</default>
+      <summary>Show Preview</summary>
+      <description>Used to trigger a preview of the OSD from preferences</description>
+    </key>
+  </schema>
+</schemalist> 
