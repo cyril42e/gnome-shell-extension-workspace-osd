@@ -18,33 +18,27 @@ export default class WorkspaceOSDExtension extends Extension {
       this._osd = null;
     }
 
+    // Create the OSD label directly
+    this._osd = new St.Label({
+      text,
+      style_class: 'workspace-osd',
+    });
+
+    // Add to the UI group
+    Main.uiGroup.add_child(this._osd);
+    
     // Get the primary monitor geometry
     const primaryMonitor = Main.layoutManager.primaryMonitor;
     
-    // Create a container limited to the primary monitor
-    this._osd = new St.Bin({
-      layout_manager: new Clutter.BinLayout(),
-      x_expand: true,
-      y_expand: true,
-      x: primaryMonitor.x,
-      y: primaryMonitor.y,
-      width: primaryMonitor.width,
-      height: primaryMonitor.height
-    });
+    // Ensure the label size is allocated before positioning
+    this._osd.ensure_style();
     
-    // Create the label with the workspace name
-    const label = new St.Label({
-      text,
-      style_class: 'workspace-osd',
-      x_align: Clutter.ActorAlign.CENTER,
-      y_align: Clutter.ActorAlign.CENTER
-    });
+    // Calculate position based on configured percentages
+    const x = primaryMonitor.x + Math.round((primaryMonitor.width - this._osd.width) * 0.5);
+    const y = primaryMonitor.y + Math.round((primaryMonitor.height - this._osd.height) * 0.5);
     
-    // Add the label to the container which handles proper alignment
-    this._osd.set_child(label);
-    
-    // Add the container to the UI group
-    Main.uiGroup.add_child(this._osd);
+    // Position with rounding for pixel alignment
+    this._osd.set_position(x, y);
 
     // Entry animation
     this._osd.opacity = 0;
