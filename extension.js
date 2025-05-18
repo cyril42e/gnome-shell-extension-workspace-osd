@@ -136,8 +136,8 @@ export default class WorkspaceOSDExtension extends Extension {
         // Reset the flag immediately
         this._settings.set_boolean('show-preview', false);
         
-        // Show a preview OSD
-        this._showPreview();
+        // Show the current workspace OSD as preview
+        this._showOSD();
       }
     });
     
@@ -158,58 +158,6 @@ export default class WorkspaceOSDExtension extends Extension {
     this._signal = global.workspace_manager.connect(
       'active-workspace-changed',
       () => this._showOSD()
-    );
-  }
-
-  _showPreview() {
-    // Clear any existing OSDs
-    this._clearOSDs();
-    
-    if (this._timeoutId) {
-      GLib.Source.remove(this._timeoutId);
-      this._timeoutId = 0;
-    }
-    
-    // Check if we should show on all monitors
-    const showOnAllMonitors = this._settings.get_boolean('show-on-all-monitors');
-    
-    if (showOnAllMonitors) {
-      // Create a preview OSD for each monitor
-      Main.layoutManager.monitors.forEach(monitor => {
-        const osd = this._createOSD('Preview', monitor);
-        this._osds.push(osd);
-      });
-    } else {
-      // Only show on primary monitor
-      const primaryMonitor = Main.layoutManager.primaryMonitor;
-      const osd = this._createOSD('Preview', primaryMonitor);
-      this._osds.push(osd);
-    }
-    
-    // Get display duration from settings
-    const displayDuration = this._settings.get_int('display-duration');
-    // Get animation duration from settings
-    const animDuration = this._settings.get_int('animation-duration');
-    
-    // Hide the OSD after the configured duration
-    this._timeoutId = GLib.timeout_add(
-      GLib.PRIORITY_DEFAULT,
-      displayDuration,
-      () => {
-        this._osds.forEach(osd => {
-          osd.ease({
-            opacity: 0,
-            duration: animDuration,
-            mode: Clutter.AnimationMode.EASE_IN_QUAD,
-            onComplete: () => {
-              osd.destroy();
-            }
-          });
-        });
-        this._osds = [];
-        this._timeoutId = 0;
-        return GLib.SOURCE_REMOVE;
-      }
     );
   }
 
