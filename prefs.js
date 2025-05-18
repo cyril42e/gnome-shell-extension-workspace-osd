@@ -274,15 +274,6 @@ export default class WorkspaceOSDPreferences extends ExtensionPreferences {
             settings.set_string('custom-css', css);
         });
 
-        // Help text
-        const helpLabel = new Gtk.Label({
-            label: '<small>Note: CSS changes will apply after switching workspace. Enter CSS rules without the class selector and braces.</small>',
-            use_markup: true,
-            wrap: true,
-            margin_top: 8,
-        });
-        cssGroup.add(helpLabel);
-        
         // Preview section
         const previewGroup = new Adw.PreferencesGroup({
             title: 'Preview',

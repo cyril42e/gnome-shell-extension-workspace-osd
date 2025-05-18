@@ -12,88 +12,10 @@ export default class WorkspaceOSDExtension extends Extension {
     this._osd = null;
     this._timeoutId = 0;
     this._settings = null;
-    this._customStyleClass = 'workspace-osd-custom';
-    this._styleSheetPath = null;
   }
 
   _loadSettings() {
     this._settings = this.getSettings();
-    
-    // Watch for CSS changes to update style immediately if open
-    this._settings.connect('changed::custom-css', () => {
-      if (this._osd) {
-        this._createCustomStylesheet();
-      }
-    });
-  }
-
-  _createCustomStylesheet() {
-    // Get the custom CSS from settings
-    let customCSS = this._settings.get_string('custom-css');
-    
-    // If custom CSS is empty, use the default CSS from file
-    if (!customCSS || customCSS.trim() === '') {
-      customCSS = loadDefaultCSS();
-    }
-    
-    // Unload existing stylesheet if present
-    this._removeStylesheet();
-
-    // Create a style element for the custom CSS
-    const styleContent = `.${this._customStyleClass} {
-${customCSS}
-}`;
-    
-    try {
-      // Write to a temporary stylesheet
-      const [file, stream] = Gio.File.new_tmp('workspace-osd-XXXXXX.css');
-      const path = file.get_path();
-      
-      // Save the path for cleanup
-      this._styleSheetPath = path;
-      
-      // Write content to the file
-      const outputStream = stream.get_output_stream();
-      outputStream.write_all(styleContent, null);
-      outputStream.close(null);
-      
-      // Load the stylesheet
-      const themeContext = St.ThemeContext.get_for_stage(global.stage);
-      if (themeContext && themeContext.get_theme()) {
-        const theme = themeContext.get_theme();
-        theme.load_stylesheet(path);
-        
-        // Ensure the theme is updated
-        themeContext.set_theme(theme);
-        return true;
-      }
-    } catch (e) {
-      logError(e, 'Error creating custom stylesheet');
-    }
-    
-    return false;
-  }
-  
-  _removeStylesheet() {
-    if (this._styleSheetPath) {
-      try {
-        // Unload from theme
-        const themeContext = St.ThemeContext.get_for_stage(global.stage);
-        if (themeContext && themeContext.get_theme()) {
-          themeContext.get_theme().unload_stylesheet(this._styleSheetPath);
-        }
-        
-        // Delete the file
-        const file = Gio.File.new_for_path(this._styleSheetPath);
-        if (file.query_exists(null)) {
-          file.delete(null);
-        }
-      } catch (e) {
-        logError(e, 'Error removing custom stylesheet');
-      }
-      
-      this._styleSheetPath = null;
-    }
   }
 
   _createOSD(text) {
@@ -102,13 +24,16 @@ ${customCSS}
       this._osd = null;
     }
 
-    // Apply custom stylesheet first
-    this._createCustomStylesheet();
+    // Get CSS from settings or use default
+    let customCSS = this._settings.get_string('custom-css');
+    if (!customCSS || customCSS.trim() === '') {
+      customCSS = loadDefaultCSS();
+    }
     
-    // Create the OSD label directly with our custom style class
+    // Create the OSD label with direct inline style
     this._osd = new St.Label({
       text,
-      style_class: this._customStyleClass,
+      style: customCSS, // Apply CSS directly
     });
 
     // Add to the UI group
@@ -198,6 +123,18 @@ ${customCSS}
       }
     });
     
+    // Listen for CSS changes to update live if the OSD is visible
+    this._cssChanged = this._settings.connect('changed::custom-css', () => {
+      if (this._osd) {
+        // Update the style immediately if OSD is visible
+        let customCSS = this._settings.get_string('custom-css');
+        if (!customCSS || customCSS.trim() === '') {
+          customCSS = loadDefaultCSS();
+        }
+        this._osd.set_style(customCSS);
+      }
+    });
+    
     this._signal = global.workspace_manager.connect(
       'active-workspace-changed',
       () => this._showOSD()
@@ -256,6 +193,11 @@ ${customCSS}
       this._previewChanged = null;
     }
     
+    if (this._cssChanged) {
+      this._settings.disconnect(this._cssChanged);
+      this._cssChanged = null;
+    }
+    
     if (this._osd) {
       this._osd.destroy();
       this._osd = null;
@@ -265,9 +207,6 @@ ${customCSS}
       GLib.Source.remove(this._timeoutId);
       this._timeoutId = 0;
     }
-    
-    // Clean up any custom stylesheets
-    this._removeStylesheet();
     
     this._settings = null;
   }
