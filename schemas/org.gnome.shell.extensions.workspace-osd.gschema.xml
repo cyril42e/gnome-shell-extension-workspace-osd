@@ -31,5 +31,10 @@
       <summary>Show Preview</summary>
       <description>Used to trigger a preview of the OSD from preferences</description>
     </key>
+    <key name="show-on-all-monitors" type="b">
+      <default>true</default>
+      <summary>Show on All Monitors</summary>
+      <description>Whether to show the OSD on all connected monitors</description>
+    </key>
   </schema>
 </schemalist> 

@@ -26,6 +26,26 @@ export default class WorkspaceOSDPreferences extends ExtensionPreferences {
         });
         page.add(generalGroup);
 
+        // Show on all monitors setting
+        const showOnAllMonitorsRow = new Adw.ActionRow({
+            title: 'Show on All Monitors',
+            subtitle: 'Display workspace OSD on all connected monitors',
+        });
+        generalGroup.add(showOnAllMonitorsRow);
+
+        const showOnAllMonitorsSwitch = new Gtk.Switch({
+            active: settings.get_boolean('show-on-all-monitors'),
+            valign: Gtk.Align.CENTER,
+        });
+        showOnAllMonitorsRow.add_suffix(showOnAllMonitorsSwitch);
+        
+        settings.bind(
+            'show-on-all-monitors',
+            showOnAllMonitorsSwitch,
+            'active',
+            Gio.SettingsBindFlags.DEFAULT
+        );
+
         // Display duration setting
         const displayDurationRow = new Adw.ActionRow({
             title: 'Display Duration',
